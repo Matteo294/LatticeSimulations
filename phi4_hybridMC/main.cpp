@@ -17,7 +17,7 @@ std::random_device rd_uniform;
 std::mt19937 seed_uniform(rd_uniform());
 std::uniform_real_distribution<double> uniform(0, 1);
 
-vector<int> Npoints {10, 10}; // Nt, Nx
+vector<int> Npoints {16, 16}; // Nt, Nx
 vector<vector<double>> phi(Npoints[0], vector<double> (Npoints[1], 0.0)); // real field initialised to all zeros
 vector<vector<double>> pi(Npoints[0], vector<double> (Npoints[1], 0.0)); // fictious field initialised to all zeros
 const double m = 1.0; // mass of the field quanta
@@ -44,14 +44,20 @@ int main(){
     double val = 0.0;
     vector<double> x;
     cout << "initial energy: " << Hold << endl;
+    // Thermalization
     for(int i=0; i<1000; i++){
+        x = Mcstep(Hold);
+        Hold = x[0];
+    }
+    // Computation
+    for(int i=0; i<NMC; i++){
         x = Mcstep(Hold); 
         datafile << x[0] << "," << Hold << endl;
         Hold = x[0]; // update value of energy
         val += x[1]; // cumulative observable
     }
     cout << "Val: " << (double) val/NMC << endl;
-    cout << "Acceptance: " << (double) acceptance/NMC << endl;
+    cout << "Acceptance: " << (double) (acceptance-1000)/NMC << endl; // remove thermalization steps
 
     return 0;
 }
