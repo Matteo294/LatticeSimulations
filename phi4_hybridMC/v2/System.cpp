@@ -24,7 +24,7 @@ double System::evaluateAction(){
     return sum;
 }
 vector<vector<double>> System::copyConfiguration(){
-    return this->phi;
+    return phi;
 }
 void System::writeConfiguration(vector<vector<double>> phi){
     for(int nt = 0; nt < lattice->Nt; nt++){

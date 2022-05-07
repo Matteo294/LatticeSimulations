@@ -30,6 +30,7 @@ int main(){
     Simulator* mc = new Simulator(s, latt);
 
     latt->latticeInfo();
+    cout << "g: " << s->g << " m^2: " << s->m2 << endl;
 
     mc->thermalize(Nthermalization);
     mc->runMC(NMC);
