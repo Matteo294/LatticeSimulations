@@ -20,13 +20,17 @@ void Simulator::thermalize(int n){
     int i=0;
     cout << "Thermalization started..." << endl;
     do{
+
         Eold = Enew;
-         // Random momenta
+
+         // Assign random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
                 pi[nt][nx] = gaussian(seed_gaussian);
             }
         }
+
+        // Copy field configuration in case the new one will be rejected
         vector<vector<double>> phi2 = s->copyConfiguration();
 
 
@@ -56,35 +60,38 @@ void Simulator::thermalize(int n){
 
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
-        cout << "delta " << deltaE << " " << Enew << " " << Eold << " ";
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
             Enew = Eold;
             deltaE = 0.0;
-            cout << "refused" << endl;
-        } else cout << "accepted" << endl;
+        }
         i++;
     } while(i<n);
-    cout << "Thermalization completed." << endl;
+    cout << "Thermalization completed" << endl;
+
 }
 
 void Simulator::runMC(int n){
     double deltaE=0.;
-    double avgdE=0., avgexpdeltaE=0., M=0.; // observables to compute
+    double avgdE=0., avgexpdeltaE=0.; // observables to compute
     
     int progress = 0;
     acceptance = 0;
     for(int i=0; i<n; i++){
+
+        // Just to print the progress of the simulation
         if (progress != ((int)((double)i/n*10))) {progress = (int)((double)i/n*10); cout << "Progress: " << progress*10 << "%" << endl;}
 
         Eold = Enew;
 
-        // Random momentum
+        // Assign random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
                 pi[nt][nx] = gaussian(seed_gaussian);
             }
         }
+
+        // Create a copy of the field in case the new configuration will be rejected
         vector<vector<double>> phi2 = s->copyConfiguration();
 
         
@@ -111,15 +118,15 @@ void Simulator::runMC(int n){
             }
         }
         
-
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
-        cout << "delta " << deltaE << " " << Enew << " " << Eold << " ";
+        cout << "deltaE " << deltaE << " New energy: " << Enew << " Old energy: " << Eold << " --> ";
+
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
             Enew = Eold;
             deltaE = 0.0;
-            cout << "refused" << endl;
+            cout << "rejected" << endl;
         }
         else{
             acceptance++;
@@ -129,17 +136,9 @@ void Simulator::runMC(int n){
         // Compute observables
         avgdE += deltaE;
         avgexpdeltaE += exp(-deltaE);
-        /*double sum=0.0;
-        for(int nt=0; nt<lattice->Nt; nt++){
-            for(int nx=0; nx<lattice->Nx; nx++){
-                sum += s->phi[nt][nx];
-            }
-        }
-        M += (double) 1./(lattice->Nt*lattice->Nx) * sum;*/
     }
-    cout << (int) acceptance/n*100 << " " << (double) avgdE/n << " " << (double) avgexpdeltaE/n << " " << M << endl;
-
-    //return vector<double> {Enew, deltaE, expdeltaE, M};
+    // Print observables
+    cout << (int) acceptance/n*100 << " " << (double) avgdE/n << " " << (double) avgexpdeltaE/n << endl;
 }
 
 void Simulator::leapfrogStep(){
@@ -159,10 +158,9 @@ double Simulator::evaluateDrift(int nt, int nx){
     double Nt = lattice->Nt;
     double Nx = lattice->Nx;
     return 0;
-    return 0.5 * (s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)]
-        - 2*s->phi[nt][nx] 
-        + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx]) - (s->m2*s->phi[nt][nx] 
-        - (double) s->g/6.*pow(s->phi[nt][nx], 3));
+    return s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)] + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx] // kinetic term
+        - s->m2*s->phi[nt][nx] // phi^2 term
+        - (double) s->g/6.*pow(s->phi[nt][nx], 3); // phi^4 term
 }
 
 double Simulator::computeHamiltonian(){
