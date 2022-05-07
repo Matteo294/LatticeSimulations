@@ -19,8 +19,8 @@ class Simulator{
         class System* s;
         class Lattice* lattice;
         // HMC
-        double T=1.0; // MD simulation time
-        double dt=1e-2;
+        double T; // MD simulation time
+        double dt;
         std::vector<std::vector<double>> pi;
         std::random_device rd_gaussian;
         std::mt19937 seed_gaussian;

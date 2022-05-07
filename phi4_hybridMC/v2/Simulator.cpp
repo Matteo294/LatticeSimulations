@@ -9,7 +9,7 @@ Simulator::Simulator(class System* s, class Lattice* l) :
     pi(l->Nt, vector<double> (l->Nx, 0.0)),
     seed_uniform(rd_uniform()),
     uniform(0, 1)
-    {acceptance=0; this->lattice=l; this->s=s;}
+    {acceptance=0; this->lattice=l; this->s=s; this->dt=1e-3; this->T=1e-1;}
 
 Simulator::~Simulator(){};
 
@@ -21,7 +21,7 @@ void Simulator::thermalize(int n){
     cout << "Thermalization started..." << endl;
     do{
         Eold = Enew;
-         // Random momentum
+         // Random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
                 pi[nt][nx] = gaussian(seed_gaussian);
@@ -34,11 +34,13 @@ void Simulator::thermalize(int n){
         }
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
+        cout << "delta " << deltaE << " " << Enew << " " << Eold << " ";
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
             Enew = Eold;
             deltaE = 0.0;
-        }
+            cout << "refused" << endl;
+        } else cout << "accepted" << endl;
         i++;
     } while(i<n);
     cout << "Thermalization completed." << endl;
@@ -70,13 +72,16 @@ void Simulator::runMC(int n){
 
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
+        cout << "delta " << deltaE << " " << Enew << " " << Eold << " ";
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
             Enew = Eold;
             deltaE = 0.0;
+            cout << "refused" << endl;
         }
         else{
-            acceptance += 1;
+            acceptance++;
+            cout << "accepted" << endl;
         }
 
         // Compute observables
@@ -90,7 +95,7 @@ void Simulator::runMC(int n){
         }
         M += (double) 1./(lattice->Nt*lattice->Nx) * sum;*/
     }
-    cout << (int) acceptance/n*100 << " " << avgdE << " " << avgexpdeltaE << " " << M << endl;
+    cout << (int) acceptance/n*100 << " " << (double) avgdE/n << " " << (double) avgexpdeltaE/n << " " << M << endl;
 
     //return vector<double> {Enew, deltaE, expdeltaE, M};
 }
@@ -110,8 +115,8 @@ double Simulator::evaluateDrift(int nt, int nx){
     double Nt = lattice->Nt;
     double Nx = lattice->Nx;
     return 0.5 * (s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)] 
-        + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx]) - 0.5*dt * (s->m2*s->phi[nt][nx] 
-        + (double) s->g/6.*pow(s->phi[nt][nx], 3));
+        + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx]) - (s->m2*s->phi[nt][nx] 
+        - (double) s->g/6.*pow(s->phi[nt][nx], 3));
 }
 
 double Simulator::computeHamiltonian(){
