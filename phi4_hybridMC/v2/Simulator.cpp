@@ -9,7 +9,7 @@ Simulator::Simulator(class System* s, class Lattice* l) :
     pi(l->Nt, vector<double> (l->Nx, 0.0)),
     seed_uniform(rd_uniform()),
     uniform(0, 1)
-    {acceptance=0; this->lattice=l; this->s=s; this->dt=1e-3; this->T=1e-1;}
+    {acceptance=0; this->lattice=l; this->s=s; this->dt=1e-3; this->T=1e-2;}
 
 Simulator::~Simulator(){};
 
@@ -28,10 +28,32 @@ void Simulator::thermalize(int n){
             }
         }
         vector<vector<double>> phi2 = s->copyConfiguration();
+
+
         // Evolve with molecular dynamics
-        for(double t=0; t<=T; t+=dt){
+        // First step
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                pi[nt][nx] += 0.5*dt*evaluateDrift(nt, nx);
+            }
+        }
+        // Intermediate steps
+        for(double t=dt; t<=T; t+=dt){
             leapfrogStep();
         }
+        // Final step
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                s->phi[nt][nx] += dt*pi[nt][nx];
+            }
+        }
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                pi[nt][nx] += 0.5*dt*evaluateDrift(nt, nx);
+            }
+        }
+
+
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
         cout << "delta " << deltaE << " " << Enew << " " << Eold << " ";
@@ -64,11 +86,31 @@ void Simulator::runMC(int n){
             }
         }
         vector<vector<double>> phi2 = s->copyConfiguration();
+
         
         // Evolve with molecular dynamics
-        for(double t=0; t<=lattice->Nt; t+=dt){
+        // First step
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                pi[nt][nx] += 0.5*dt*evaluateDrift(nt, nx);
+            }
+        }
+        // Intermediate steps
+        for(double t=dt; t<=T; t+=dt){
             leapfrogStep();
         }
+        // Final step
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                s->phi[nt][nx] += dt*pi[nt][nx];
+            }
+        }
+        for(int nt = 0; nt < lattice->Nt; nt++){
+            for(int nx = 0; nx < lattice->Nx; nx++){
+                pi[nt][nx] += 0.5*dt*evaluateDrift(nt, nx);
+            }
+        }
+        
 
         Enew = this->computeHamiltonian();
         deltaE = Enew-Eold;
@@ -101,12 +143,14 @@ void Simulator::runMC(int n){
 }
 
 void Simulator::leapfrogStep(){
-    
     for(int nt=0; nt<lattice->Nt; nt++){
         for(int nx=0; nx<lattice->Nx; nx++){
-            pi[nt][nx] = pi[nt][nx] + 0.5*dt*evaluateDrift(nt, nx);
             s->phi[nt][nx] += dt*pi[nt][nx];
-            pi[nt][nx] = pi[nt][nx] + 0.5*dt*evaluateDrift(nt, nx);
+        }
+    }
+    for(int nt=0; nt<lattice->Nt; nt++){
+        for(int nx=0; nx<lattice->Nx; nx++){
+            pi[nt][nx] += dt*evaluateDrift(nt, nx);
         }
     }
 }
@@ -114,7 +158,9 @@ void Simulator::leapfrogStep(){
 double Simulator::evaluateDrift(int nt, int nx){
     double Nt = lattice->Nt;
     double Nx = lattice->Nx;
-    return 0.5 * (s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)] 
+    return 0;
+    return 0.5 * (s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)]
+        - 2*s->phi[nt][nx] 
         + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx]) - (s->m2*s->phi[nt][nx] 
         - (double) s->g/6.*pow(s->phi[nt][nx], 3));
 }
