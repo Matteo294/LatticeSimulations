@@ -31,7 +31,7 @@ int main(){
 
     latt->latticeInfo();
 
-    mc->thermalize(Nthermalization);
+//    mc->thermalize(Nthermalization);
     mc->runMC(NMC);
 
     return 0;

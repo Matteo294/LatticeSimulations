@@ -91,6 +91,8 @@ void Simulator::runMC(int n){
             }
         }
 
+        Eold = this->computeHamiltonian();
+
         // Create a copy of the field in case the new configuration will be rejected
         vector<vector<double>> phi2 = s->copyConfiguration();
 
@@ -157,7 +159,7 @@ void Simulator::leapfrogStep(){
 double Simulator::evaluateDrift(int nt, int nx){
     double Nt = lattice->Nt;
     double Nx = lattice->Nx;
-    return 0;
+//    return 0;
     return s->phi[PBCidx(nt+1, Nt)][nx] + s->phi[PBCidx(nt-1, Nt)][nx] + s->phi[nt][PBCidx(nx+1, Nx)] + s->phi[nt][PBCidx(nx-1, Nx)] - 4*s->phi[nt][nx] // kinetic term
         - s->m2*s->phi[nt][nx] // phi^2 term
         - (double) s->g/6.*pow(s->phi[nt][nx], 3); // phi^4 term
