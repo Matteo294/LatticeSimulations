@@ -20,11 +20,9 @@ void Simulator::thermalize(int n){
     int i=0;
     cout << "Thermalization started..." << endl;
     do{
-        Eold = Enew;
 
         // Create a copy of the field in case the new configuration will be rejected
         vector<vector<double>> phi2 = s->copyConfiguration();
-        vector<vector<double>> pi2(pi);
     
         // Assign random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
@@ -32,6 +30,8 @@ void Simulator::thermalize(int n){
                 pi[nt][nx] = gaussian(seed_gaussian);
             }
         }
+
+        Eold = computeHamiltonian();
         
         // Evolve with molecular dynamics
         // First step
@@ -62,12 +62,7 @@ void Simulator::thermalize(int n){
 
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
-            for(int nt=0; nt<lattice->Nt; nt++){
-                for(int nx=0; nx<lattice->Nx; nx++){
-                    pi[nt][nx] = pi2[nt][nx];
-                }
-            }
-            Enew = computeHamiltonian();
+            Enew = Eold;
             deltaE = 0.0;
             cout << "rejected" << endl;
         }
@@ -87,22 +82,24 @@ void Simulator::runMC(int n){
     
     int progress = 0;
     acceptance = 0;
-    Enew = computeHamiltonian();
+
     for(int i=0; i<n; i++){
 
         // Just to print the progress of the simulation
         if (progress != ((int)((double)i/n*10))) {progress = (int)((double)i/n*10); cout << "Progress: " << progress*10 << "%" << endl;}
-        Eold = Enew;
 
-        // Create a copy of the field in case the new configuration will be rejected
-        vector<vector<double>> phi2 = s->copyConfiguration();
-        vector<vector<double>> pi2(pi);
+        //vector<vector<double>> pi2(pi);
         // Assign random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
                 pi[nt][nx] = gaussian(seed_gaussian);
             }
         }
+
+        Eold = computeHamiltonian();
+
+        // Create a copy of the field in case the new configuration will be rejected
+        vector<vector<double>> phi2 = s->copyConfiguration();
         
         // Evolve with molecular dynamics
         // First step
@@ -133,11 +130,6 @@ void Simulator::runMC(int n){
 
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
             s->writeConfiguration(phi2);
-            for(int nt=0; nt<lattice->Nt; nt++){
-                for(int nx=0; nx<lattice->Nx; nx++){
-                    pi[nt][nx] = pi2[nt][nx];
-                }
-            }
             Enew = Eold;
             deltaE = 0.0;
             cout << "rejected" << endl;
