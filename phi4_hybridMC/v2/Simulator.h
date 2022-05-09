@@ -11,7 +11,7 @@ class Simulator{
     public:
         Simulator(class System* S, class Lattice* l);
         ~Simulator();
-        void runMC(int n, double thermalization=0.1);
+        double runMC(int n, double thermalization=0.1);
         double computeHamiltonian();
         int acceptance;
         class System* s;

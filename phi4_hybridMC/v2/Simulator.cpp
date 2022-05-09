@@ -13,7 +13,7 @@ Simulator::Simulator(class System* s, class Lattice* l) :
 
 Simulator::~Simulator(){};
 
-void Simulator::runMC(int n, double thermalization){
+double Simulator::runMC(int n, double thermalization){
     double deltaE=0., Eproposal=0., E=0., Eold, M;
     double avgdE=0., avgexpdeltaE=0.; // observables to compute
     int Nthermalization = thermalization*n;
@@ -87,6 +87,7 @@ void Simulator::runMC(int n, double thermalization){
     }
     // Print observables
     cout << endl << "Observables values" << endl << "Acceptance: " << ((double)acceptance/(n-Nthermalization)*100) << "% deltaE: " << (double) avgdE/(n-Nthermalization) << " exp(-deltaE): " << (double) avgexpdeltaE/(n-Nthermalization) << " M: " << M/(n-Nthermalization) << endl;
+    return M;
 }
 
 void Simulator::leapfrogStep(){
