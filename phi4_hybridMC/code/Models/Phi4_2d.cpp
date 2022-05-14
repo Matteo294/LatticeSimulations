@@ -11,8 +11,8 @@ double Phi4_2d::evaluateAction(){
     int Nx = this->lattice->Nx;
     for(int nt=0; nt<Nt; nt++){
         for(int nx=0; nx<Nx; nx++){
-            sum = sum - 0.5 * phi[nt][nx] * (phi[PBCidx(nt+1, Nt)][nx] + phi[PBCidx(nt-1, Nt)][nx] + phi[nt][PBCidx(nx+1, Nx)] + phi[nt][PBCidx(nx-1, Nx)] - 4*phi[nt][nx])
-            + 0.5*m2*phi[nt][nx]*phi[nt][nx] + (double) g/24. * pow(phi[nt][nx], 4);
+            sum = sum - 0.5 * lattice->phi[nt][nx] * (lattice->phi[PBCidx(nt+1, Nt)][nx] + lattice->phi[PBCidx(nt-1, Nt)][nx] + lattice->phi[nt][PBCidx(nx+1, Nx)] + lattice->phi[nt][PBCidx(nx-1, Nx)] - 4*lattice->phi[nt][nx])
+            + 0.5*m2*lattice->phi[nt][nx]*lattice->phi[nt][nx] + (double) g/24. * pow(lattice->phi[nt][nx], 4);
         }
     }
     return sum;
@@ -26,7 +26,7 @@ void Phi4_2d::modelInfo(){
 double Phi4_2d::evaluateMDdrift(int nt, int nx){
     double Nt = lattice->Nt;
     double Nx = lattice->Nx;
-    return phi[PBCidx(nt+1, Nt)][nx] + phi[PBCidx(nt-1, Nt)][nx] + phi[nt][PBCidx(nx+1, Nx)] + phi[nt][PBCidx(nx-1, Nx)] - 4*phi[nt][nx] // kinetic term
-        - m2*phi[nt][nx] // phi^2 term
-        - (double) g/6.*pow(phi[nt][nx], 3); // phi^4 term
+    return lattice->phi[PBCidx(nt+1, Nt)][nx] + lattice->phi[PBCidx(nt-1, Nt)][nx] + lattice->phi[nt][PBCidx(nx+1, Nx)] + lattice->phi[nt][PBCidx(nx-1, Nx)] - 4*lattice->phi[nt][nx] // kinetic term
+        - m2*lattice->phi[nt][nx] // phi^2 term
+        - (double) g/6.*pow(lattice->phi[nt][nx], 3); // phi^4 term
 }
