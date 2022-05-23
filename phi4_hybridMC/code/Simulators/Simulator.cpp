@@ -6,7 +6,6 @@ Simulator::Simulator(class Model* s, class Lattice* l) :
 
     seed_gaussian(rd_gaussian()), 
     gaussian(0, 1), 
-    pi(l->Nt, vector<double> (l->Nx, 0.0)),
     seed_uniform(rd_uniform()),
     uniform(0, 1)
     {acceptance=0; this->lattice=l; this->s=s; this->dt=1e-2; this->T=1.;}
@@ -29,20 +28,28 @@ double Simulator::runMC(int n, double thermalization){
         // Assign random momenta
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
-                pi[nt][nx] = gaussian(seed_gaussian);
+                for(int ny=0; ny<lattice->Ny; ny++){
+                    for(int nz=0; nz<lattice->Nz; nz++){
+                        s->pi[nt][nx][ny][nz] = gaussian(seed_gaussian);
+                    }
+                }
             }
         }
 
         E = computeHamiltonian();
 
         // Create a copy of the field in case the new configuration will be rejected
-        vector<vector<double>> phi2 = s->copyConfiguration();
+        vector<vector<vector<vector<double>>>> phi2 = s->copyConfiguration();
         
         // Evolve with molecular dynamics
         // First step
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
-                pi[nt][nx] += 0.5*dt*s->evaluateMDdrift(nt, nx);
+                for(int ny=0; ny<lattice->Ny; ny++){
+                    for(int nz=0; nz<lattice->Nz; nz++){
+                        s->pi[nt][nx][ny][nz] += 0.5*dt*s->evaluateMDdrift(nt, nx, ny, nz);
+                    }
+                }
             }
         }
         // Intermediate steps
@@ -52,12 +59,20 @@ double Simulator::runMC(int n, double thermalization){
         // Final step
         for(int nt=0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
-                s->phi[nt][nx] += dt*pi[nt][nx];
+                for(int ny=0; ny<lattice->Ny; ny++){
+                    for(int nz=0; nz<lattice->Nz; nz++){
+                        s->phi[nt][nx][ny][nz] += dt*s->pi[nt][nx][ny][nz];
+                    }
+                }
             }
         }
         for(int nt = 0; nt < lattice->Nt; nt++){
             for(int nx = 0; nx < lattice->Nx; nx++){
-                pi[nt][nx] += 0.5*dt*s->evaluateMDdrift(nt, nx);
+                for(int ny=0; ny < lattice->Ny; ny++){
+                    for(int nz=0; nz < lattice->Nz; nz++){
+                        s->pi[nt][nx][ny][nz] += 0.5*dt*s->evaluateMDdrift(nt, nx, ny, nz);
+                    }
+                }
             }
         }
         
@@ -79,10 +94,14 @@ double Simulator::runMC(int n, double thermalization){
             double Mcurr = 0.;
             for(int nt=0; nt<lattice->Nt; nt++){
                 for(int nx=0;nx<lattice->Nx; nx++){
-                    Mcurr += s->phi[nt][nx];
+                    for(int ny=0; ny<lattice->Ny; ny++){
+                        for(int nz=0; nz<lattice->Nz; nz++){
+                            Mcurr += s->phi[nt][nx][ny][nz];
+                        }
+                    }
                 }
             }
-            M += (double) Mcurr/(lattice->Nt*lattice->Nx);
+            M += (double) Mcurr/(lattice->Nt*lattice->Nx*lattice->Ny*lattice->Nz);
         }
     }
     // Print observables
@@ -93,12 +112,20 @@ double Simulator::runMC(int n, double thermalization){
 void Simulator::leapfrogStep(){
     for(int nt=0; nt<lattice->Nt; nt++){
         for(int nx=0; nx<lattice->Nx; nx++){
-            s->phi[nt][nx] += dt*pi[nt][nx];
+            for(int ny=0; ny<lattice->Ny; ny++){
+                for(int nz=0; nz<lattice->Nz; nz++){
+                    s->phi[nt][nx][ny][nz] += dt*s->pi[nt][nx][ny][nz];
+                }
+            }
         }
     }
     for(int nt=0; nt<lattice->Nt; nt++){
         for(int nx=0; nx<lattice->Nx; nx++){
-            pi[nt][nx] += dt*s->evaluateMDdrift(nt, nx);
+            for(int ny=0; ny<lattice->Ny; ny++){
+                for(int nz=0; nz<lattice->Nz; nz++){
+                    s->pi[nt][nx][ny][nz] += dt*s->evaluateMDdrift(nt, nx, ny, nz);
+                }
+            }
         }
     }
 }
@@ -107,7 +134,11 @@ double Simulator::computeHamiltonian(){
     double sum = 0.0;
     for(int nt=0; nt<lattice->Nt; nt++){
         for(int nx=0; nx<lattice->Nx; nx++){
-            sum += pi[nt][nx]*pi[nt][nx];
+            for(int ny=0; ny<lattice->Ny; ny++){
+                for(int nz=0; nz<lattice->Nz; nz++){
+                    sum += s->pi[nt][nx][ny][nz]*s->pi[nt][nx][ny][nz];
+                }
+            }
         }
     }
     return 0.5*sum + s->evaluateAction(); // H + S

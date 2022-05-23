@@ -19,7 +19,6 @@ class Simulator{
         // HMC
         double T; // MD simulation time
         double dt;
-        std::vector<std::vector<double>> pi;
         std::random_device rd_gaussian;
         std::mt19937 seed_gaussian;
         std::normal_distribution<> gaussian;
