@@ -6,6 +6,7 @@
 #include "Models/Model.h"
 #include "Models/Phi4_2d.h"
 #include "Lattices/Lattice.h"
+#include <omp.h>
 
 using namespace std;
 
@@ -19,24 +20,23 @@ int main(){
 
     double M;
 
-    //vector<double> m2 {0.173913, -0.307692, -0.571429};
-    double m2;
-
-    //vector<double> g {2.26843, 1.77515, 1.53061};
+    vector<double> m2 {0.173913, -0.307692, -0.571429};
     double g = 2.;
 
     Lattice* latt = new Lattice(16, 16); // 16 time points, 16 space points
     latt->latticeInfo();
 
-    for(int i=0; i<50; i++){
-        m2 = (double) (2. - (-2.))/50.*i - 2.; 
-        cout << endl << "********** Simulation " << i+1 << " **********" << endl;
-        Phi4_2d* model = new Phi4_2d(latt, m2, g);
-        model->modelInfo();
-        Simulator* HMC = new Simulator(model, latt);
-        M = HMC->runMC(NMC);
-        results << m2 << "," << M << endl;
+    #pragma omp parallel for
+    for(int i=0; i<3; i++){
+        double M;
+        Phi4_2d* model = new Phi4_2d(latt, m2[i], g);
+        Simulator* s = new Simulator(model, latt);
+        M = s->runMC(NMC);
+        cout << i << " " << M << endl;
+        delete model, s;
     }
+
+    delete latt;
 
     return 0;
 }

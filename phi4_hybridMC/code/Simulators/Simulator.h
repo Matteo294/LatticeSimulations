@@ -9,7 +9,7 @@
 // The hybrid monte carlo could then be implemented as a subclass
 class Simulator{
     public:
-        Simulator(class Model* S, class Lattice* l);
+        Simulator(class Model* s, class Lattice* l);
         ~Simulator();
         double runMC(int n, double thermalization=0.1);
         double computeHamiltonian();

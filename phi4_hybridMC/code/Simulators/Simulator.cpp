@@ -86,7 +86,7 @@ double Simulator::runMC(int n, double thermalization){
         }
     }
     // Print observables
-    cout << endl << "Observables values" << endl << "Acceptance: " << ((double)acceptance/(n-Nthermalization)*100) << "% deltaE: " << (double) avgdE/(n-Nthermalization) << " exp(-deltaE): " << (double) avgexpdeltaE/(n-Nthermalization) << " M: " << M/(n-Nthermalization) << endl;
+    cout << endl << "Magnetization: " << M << endl << "Acceptance: " << ((double)acceptance/(n-Nthermalization)*100) << "% deltaE: " << (double) avgdE/(n-Nthermalization) << " exp(-deltaE): " << (double) avgexpdeltaE/(n-Nthermalization) << " M: " << M/(n-Nthermalization) << endl;
     return M;
 }
 

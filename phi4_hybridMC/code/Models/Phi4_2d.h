@@ -6,11 +6,13 @@ using namespace std;
 class Phi4_2d : public Model{
     public:
         Phi4_2d(class Lattice* latt, double m2, double g);
-        ~Phi4_2d();
+        ~Phi4_2d(){;}
         void modelInfo();
-    protected:
-        double m2, g; // coefficients phi^2 and phi^4
+        vector<vector<double>> copyConfiguration();
+        void writeConfiguration(vector<vector<double>> phi);
         double evaluateAction();
         double evaluateMDdrift(int nt, int nx); // drift term for Molecular Dynamics evolution
+    protected:
+        double m2, g; // coefficients phi^2 and phi^4
 
 };
