@@ -5,6 +5,7 @@
 #include "../Models/Model.h"
 #include "../Lattices/Lattice.h"
 #include "../Other/other.h"
+#include <omp.h>
 
 // The hybrid monte carlo could then be implemented as a subclass
 class Simulator{

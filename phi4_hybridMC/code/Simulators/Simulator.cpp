@@ -13,21 +13,21 @@ Simulator::Simulator(class Model* s, class Lattice* l) :
 Simulator::~Simulator(){};
 
 double Simulator::runMC(int n, double thermalization){
-    double deltaE=0., Eproposal=0., E=0., Eold, M;
+    double deltaE=0., Eproposal=0., E=0., Eold=0., M=0.;
     double avgdE=0., avgexpdeltaE=0.; // observables to compute
     int Nthermalization = thermalization*n;
     
-    int progress = 0;
+    //int progress = 0;
     acceptance = 0;
 
     for(int i=0; i<n; i++){
 
         // Just to print the progress of the simulation
-        if (progress != ((int)((double)i/n*10))) {progress = (int)((double)i/n*10); cout << "Progress: " << progress*10 << "%" << endl;}
+        //if (progress != ((int)((double)i/n*10))) {progress = (int)((double)i/n*10); cout << "Progress: " << progress*10 << "%" << endl;}
 
         // Assign random momenta
-        for(int nt = 0; nt < lattice->Nt; nt++){
-            for(int nx = 0; nx < lattice->Nx; nx++){
+        for(int nt=0; nt<lattice->Nt; nt++){
+            for(int nx=0; nx<lattice->Nx; nx++){
                 for(int ny=0; ny<lattice->Ny; ny++){
                     for(int nz=0; nz<lattice->Nz; nz++){
                         s->pi[nt][nx][ny][nz] = gaussian(seed_gaussian);
@@ -43,8 +43,8 @@ double Simulator::runMC(int n, double thermalization){
         
         // Evolve with molecular dynamics
         // First step
-        for(int nt = 0; nt < lattice->Nt; nt++){
-            for(int nx = 0; nx < lattice->Nx; nx++){
+        for(int nt=0; nt<lattice->Nt; nt++){
+            for(int nx=0; nx<lattice->Nx; nx++){
                 for(int ny=0; ny<lattice->Ny; ny++){
                     for(int nz=0; nz<lattice->Nz; nz++){
                         s->pi[nt][nx][ny][nz] += 0.5*dt*s->evaluateMDdrift(nt, nx, ny, nz);
@@ -57,8 +57,8 @@ double Simulator::runMC(int n, double thermalization){
             leapfrogStep();
         }
         // Final step
-        for(int nt=0; nt < lattice->Nt; nt++){
-            for(int nx = 0; nx < lattice->Nx; nx++){
+        for(int nt=0; nt<lattice->Nt; nt++){
+            for(int nx=0; nx<lattice->Nx; nx++){
                 for(int ny=0; ny<lattice->Ny; ny++){
                     for(int nz=0; nz<lattice->Nz; nz++){
                         s->phi[nt][nx][ny][nz] += dt*s->pi[nt][nx][ny][nz];
@@ -66,10 +66,10 @@ double Simulator::runMC(int n, double thermalization){
                 }
             }
         }
-        for(int nt = 0; nt < lattice->Nt; nt++){
-            for(int nx = 0; nx < lattice->Nx; nx++){
-                for(int ny=0; ny < lattice->Ny; ny++){
-                    for(int nz=0; nz < lattice->Nz; nz++){
+        for(int nt=0; nt<lattice->Nt; nt++){
+            for(int nx=0; nx<lattice->Nx; nx++){
+                for(int ny=0; ny<lattice->Ny; ny++){
+                    for(int nz=0; nz<lattice->Nz; nz++){
                         s->pi[nt][nx][ny][nz] += 0.5*dt*s->evaluateMDdrift(nt, nx, ny, nz);
                     }
                 }
@@ -105,8 +105,7 @@ double Simulator::runMC(int n, double thermalization){
         }
     }
     // Print observables
-    cout << endl << "Magnetization: " << M << endl << "Acceptance: " << ((double)acceptance/(n-Nthermalization)*100) << "% deltaE: " << (double) avgdE/(n-Nthermalization) << " exp(-deltaE): " << (double) avgexpdeltaE/(n-Nthermalization) << " M: " << M/(n-Nthermalization) << endl;
-    return M;
+    return (double)M/(n - Nthermalization);
 }
 
 void Simulator::leapfrogStep(){
