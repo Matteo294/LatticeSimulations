@@ -2,8 +2,7 @@
 #include <vector>
 #include <fstream>
 #include "Other/other.h"
-#include "Simulators/Simulator.h"
-#include "Models/Model.h"
+#include "Simulators/HMC.h"
 #include "Models/Phi4_2d.h"
 #include "Lattices/Lattice.h"
 #include <omp.h>
@@ -30,10 +29,10 @@ int main(){
     for(int i=0; i<3; i++){
         double M;
         Phi4_2d* model = new Phi4_2d(latt, m2[i], g);
-        Simulator* s = new Simulator(model, latt);
-        M = s->runMC(NMC);
+        HMC* sim = new HMC(model, latt);
+        M = sim->runMC(NMC);
         cout << i << " " << M << endl;
-        delete model, s;
+        delete model, sim;
     }
 
     delete latt;
