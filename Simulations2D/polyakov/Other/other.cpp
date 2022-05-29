@@ -2,6 +2,10 @@
 
 using namespace std;
 
+std::random_device dev;
+std::mt19937 rng(dev());
+std::uniform_real_distribution<> dist(0., 1.);
+
 int PBCidx(int n, int N){
     return (n + N)%N;
 }
@@ -41,7 +45,7 @@ vector<vector<complex<double>>> randomSU2(){
     vector<vector<complex<double>>> sigma1 {{0, 1}, {1, 0}};
     vector<vector<complex<double>>> sigma2 {{0, -im}, {im, 0}};
     vector<vector<complex<double>>> sigma3 {{1, 0}, {0, -1}};
-    vector<double> a {(double) rand()/RAND_MAX, (double) rand()/RAND_MAX, (double) rand()/RAND_MAX};
+    vector<double> a {dist(dev), dist(dev), dist(dev)};
     double anorm = sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
     for(int i=0; i<2; i++){
         for(int j=0; j<2; j++){
@@ -55,7 +59,7 @@ vector<vector<complex<double>>> randomSU2(){
 
 complex<double> trace(vector<vector<complex<double>>> M){
     complex<double> s = complex<double> {0.0, 0.0};
-    for(int i=0; i<sizeof(M)/sizeof(M[0]); i++){
+    for(int i=0; i<M.size(); i++){
             s += M[i][i];
     }
     return s;

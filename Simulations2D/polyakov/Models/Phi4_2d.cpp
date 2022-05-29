@@ -37,16 +37,11 @@ double Phi4_2d::evaluateMDdrift(int nt, int nx){
         - (double) g/6.*pow(phi[nt][nx], 3); // phi^4 term
 }
 
-vector<vector<double>> Phi4_2d::copyConfiguration(){
-    return phi;
+void Phi4_2d::copyConfiguration(){
+    phicopy = phi;
 }
-
-void Phi4_2d::writeConfiguration(vector<vector<double>> phi){
-    for(int nt = 0; nt < lattice->Nt; nt++){
-        for(int nx = 0; nx < lattice->Nx; nx++){
-            this->phi[nt][nx] = phi[nt][nx];
-        }
-    }
+void Phi4_2d::writeConfiguration(){
+    phi = phicopy;
 }
 
 double Phi4_2d::computeHamiltonian(){

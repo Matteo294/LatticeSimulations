@@ -8,12 +8,13 @@ class Phi4_2d : public Model{
         Phi4_2d(class Lattice* latt, double m2, double g);
         ~Phi4_2d(){;}
         void modelInfo();
-        vector<vector<double>> copyConfiguration();
-        void writeConfiguration(vector<vector<double>> phi);
+        void copyConfiguration();
+        void writeConfiguration();
         double evaluateAction();
         double evaluateMDdrift(int nt, int nx); // drift term for Molecular Dynamics evolution
         double computeHamiltonian();
     protected:
+        vector<vector<double>> phicopy;
         double m2, g; // coefficients phi^2 and phi^4
 
 };

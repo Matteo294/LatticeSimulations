@@ -11,7 +11,7 @@ class Simulator{
     public:
         Simulator(class Model* s, class Lattice* l);
         ~Simulator();
-        virtual double runMC(int n, double thermalization=0.1){return 0.;}
+        virtual void runMC(int n, int Nskip=0, double thermalization=0.1){;}
         int acceptance;
         class Model* s;
         class Lattice* lattice;

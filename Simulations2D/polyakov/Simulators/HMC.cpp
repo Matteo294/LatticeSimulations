@@ -3,7 +3,7 @@
 HMC::HMC(class Model* s, class Lattice* l) : Simulator(s, l){;}
 HMC::~HMC(){;}
 
-double HMC::runMC(int n, double thermalization){
+void HMC::runMC(int n, int Nskip, double thermalization){
     double deltaE=0., Eproposal=0., E=0., Eold, M;
     double avgdE=0., avgexpdeltaE=0.; // observables to compute
     int Nthermalization = thermalization*n;
@@ -25,8 +25,7 @@ double HMC::runMC(int n, double thermalization){
 
         E = s->computeHamiltonian();
 
-        // Create a copy of the field in case the new configuration will be rejected
-        vector<vector<double>> phi2 = s->copyConfiguration();
+        s->copyConfiguration();
         
         // Evolve with molecular dynamics
         // First step
@@ -55,7 +54,7 @@ double HMC::runMC(int n, double thermalization){
         deltaE = Eproposal-E;
 
         if ((deltaE > 0) && (exp(-(deltaE)) < uniform(seed_uniform))){
-            s->writeConfiguration(phi2);
+            s->writeConfiguration();
             deltaE = 0.0;
         }
         else {
@@ -77,7 +76,6 @@ double HMC::runMC(int n, double thermalization){
     }
     // Print observables
     cout << endl << "Magnetization: " << M << endl << "Acceptance: " << ((double)acceptance/(n-Nthermalization)*100) << "% deltaE: " << (double) avgdE/(n-Nthermalization) << " exp(-deltaE): " << (double) avgexpdeltaE/(n-Nthermalization) << " M: " << M/(n-Nthermalization) << endl;
-    return (double) M/(n-Nthermalization);
 }
 
 void HMC::leapfrogStep(){
