@@ -6,5 +6,5 @@ Simulation of a Phi4 theory in 1+1 dimension using the Hybrid Monte Carlo alogor
 The Polyakov loop in 1+1 dimension is stuied and compared to analytical results  
 ## String Tension  
 Still under work - computation of the string tension for an SU(2) theory  
-## Latticce Exam  
+## Lattice Exam  
 Exam for the course Advance Lattice Field Theory. I chose to study the Wilson loop for a SU(3) theory (see exercise 4 of the pdf in the folder).
