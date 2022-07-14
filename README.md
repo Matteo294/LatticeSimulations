@@ -5,4 +5,4 @@ Simulation of a Phi4 theory in 1+1 dimension using the Hybrid Monte Carlo algori
 ## Polyakov Chain  
 The Polyakov loop in 1+1 dimension is studied and compared to analytical results.  
 ## Lattice Exam  
-Final project exam of the course
+Final project exam of the course, consists in a simulation of a SU(3) Yang-Mills theory in 1+1 dimensions
