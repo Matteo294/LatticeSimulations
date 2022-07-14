@@ -4,3 +4,5 @@ This repository contains various lattice simulations, mostly taken from the Adva
 Simulation of a Phi4 theory in 1+1 dimension using the Hybrid Monte Carlo algorithm. The magnetization is studied as a function of the mass parameter.  
 ## Polyakov Chain  
 The Polyakov loop in 1+1 dimension is studied and compared to analytical results.  
+## Lattice Exam  
+Final project exam of the course
